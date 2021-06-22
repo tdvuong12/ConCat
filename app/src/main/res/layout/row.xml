@@ -5,7 +5,8 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
-    android:padding="16dp">
+    android:padding="16dp"
+    android:id="@+id/rowLayout">
 
     <ImageView
         android:id="@+id/imageView"
@@ -17,7 +18,9 @@
         android:id="@+id/textView"
         android:layout_width="match_parent"
         android:layout_height="@dimen/row_height"
+        android:gravity="center"
         android:text="TextView"
-        android:gravity="center"/>
+        android:textColor="@color/black"
+        android:textSize="@dimen/row_text_size" />
 
 </LinearLayout>

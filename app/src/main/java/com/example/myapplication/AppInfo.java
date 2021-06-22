@@ -11,32 +11,26 @@ import android.widget.Toast;
 public class AppInfo {
     private Context c;
     private String name;
-    private Drawable icon;
-    private Intent intent;
+    private ApplicationInfo applicationInfo;
+    private PackageManager pm;
 
     public AppInfo(Context c, ApplicationInfo applicationInfo, PackageManager pm) {
         this.c = c;
+        this.applicationInfo = applicationInfo;
+        this.pm = pm;
         this.name = applicationInfo.packageName;
-        try {
-            this.icon = pm.getApplicationIcon(this.name);
-        }
-        catch (PackageManager.NameNotFoundException e) {
-            e.printStackTrace();
-        }
-        this.intent = pm.getLaunchIntentForPackage(this.name);
+    }
+    public Drawable getIcon() throws PackageManager.NameNotFoundException {
+        return pm.getApplicationIcon(this.name);
     }
 
-    public String getName() {
-        return name;
-    }
-
-    public Drawable getIcon() {
-        return icon;
+    public String getLabel() {
+        return (String) pm.getApplicationLabel(applicationInfo);
     }
 
     public void launch() {
         try {
-            c.startActivity(intent);
+            c.startActivity(pm.getLaunchIntentForPackage(this.name));
         } catch (ActivityNotFoundException err) {
             Toast t = Toast.makeText(c,
                     R.string.app_not_found, Toast.LENGTH_SHORT);

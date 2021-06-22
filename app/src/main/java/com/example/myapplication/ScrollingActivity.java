@@ -3,23 +3,13 @@ package com.example.myapplication;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
-import android.graphics.Color;
+
 import android.os.Bundle;
-import android.util.Log;
-import android.view.LayoutInflater;
+
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.ImageView;
-import android.widget.ListView;
-import android.widget.TextView;
-import android.widget.Toast;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -43,15 +33,8 @@ public class ScrollingActivity extends AppCompatActivity implements AppBarLayout
     private ActivityScrollingBinding binding;
     private ActionBar actionBar;
 
-    String[] applicationNames = { "Google", "Facebook", "Google", "Facebook", "Google", "Facebook", "Google", "Facebook",
-            "Google", "Facebook", "Google", "Facebook"};
-    int[] applicationIcons = { R.mipmap.ic_launcher, R.mipmap.ic_launcher, R.mipmap.ic_launcher, R.mipmap.ic_launcher,
-            R.mipmap.ic_launcher, R.mipmap.ic_launcher, R.mipmap.ic_launcher, R.mipmap.ic_launcher,
-            R.mipmap.ic_launcher, R.mipmap.ic_launcher, R.mipmap.ic_launcher, R.mipmap.ic_launcher };
-
     RecyclerView applicationRecyclerView;
     List<ApplicationInfo> packages;
-    List<ApplicationInfo> filteredPackages;
     List<AppInfo> appInfos;
 
     @Override
@@ -84,17 +67,8 @@ public class ScrollingActivity extends AppCompatActivity implements AppBarLayout
 
         packages = pm.getInstalledApplications(PackageManager.GET_META_DATA);
 
-        filteredPackages = packages.stream()
+        appInfos = packages.stream()
                 .filter(packageInfo -> pm.getLaunchIntentForPackage(packageInfo.packageName) != null)
-                .collect(Collectors.toList());
-
-        for (ApplicationInfo app: filteredPackages) {
-            Log.d(TAG, "Launchable apps: " + app.packageName);
-        }
-
-        Log.d(TAG, String.valueOf(filteredPackages.size()));
-
-        appInfos = filteredPackages.stream()
                 .map(packageInfo -> new AppInfo(this, packageInfo, pm))
                 .collect(Collectors.toList());
 

@@ -2,23 +2,11 @@
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.content.ActivityNotFoundException;
 import android.content.Intent;
-import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
-
-import java.util.List;
-import java.util.stream.Collectors;
-
-
-import static android.content.ContentValues.TAG;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener, View.OnLongClickListener {
 
@@ -67,19 +55,4 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public boolean onLongClick(View v) {
         return false;
     }
-
-    //    private void launchApp(ApplicationInfo packagesInfo) {
-//        Intent mIntent = getPackageManager().getLaunchIntentForPackage(packagesInfo.packageName);
-//        if (mIntent != null) {
-//            try {
-//                startActivity(mIntent);
-//            } catch (ActivityNotFoundException err) {
-//                Toast t = Toast.makeText(getApplicationContext(),
-//                        R.string.app_not_found, Toast.LENGTH_SHORT);
-//                t.show();
-//            }
-//        } else {
-//            Log.d(TAG, "nope");
-//        }
-//    }
 }

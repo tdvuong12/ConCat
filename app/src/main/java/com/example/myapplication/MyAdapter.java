@@ -1,16 +1,23 @@
 package com.example.myapplication;
 
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.List;
+
+import static android.content.ContentValues.TAG;
 
 public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
     private Context context;
@@ -31,8 +38,20 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
 
     @Override
     public void onBindViewHolder(@NonNull MyAdapter.MyViewHolder holder, int position) {
-        holder.title.setText(appInfos.get(position).getName());
-        holder.icon.setImageDrawable(appInfos.get(position).getIcon());
+        AppInfo app = appInfos.get(position);
+        holder.title.setText(app.getLabel());
+        try {
+            holder.icon.setImageDrawable(app.getIcon());
+        } catch (PackageManager.NameNotFoundException e) {
+            Log.d(TAG, e.toString());
+        }
+
+        holder.rowLayout.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                app.launch();
+            }
+        });
     }
 
     @Override
@@ -44,11 +63,13 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
 
         TextView title;
         ImageView icon;
+        LinearLayout rowLayout;
 
         public MyViewHolder(@NonNull View itemView) {
             super(itemView);
             title = itemView.findViewById(R.id.textView);
             icon = itemView.findViewById(R.id.imageView);
+            rowLayout = itemView.findViewById(R.id.rowLayout);
         }
     }
 }
