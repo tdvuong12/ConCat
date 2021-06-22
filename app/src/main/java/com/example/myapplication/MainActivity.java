@@ -37,9 +37,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
                 Uri.parse("package:" + getPackageName()));
         startActivityForResult(intent, WINDOW_PERMISSION);
-        /**
-         * Requiring API of at least 23 instead of 16
-         */
         if (Settings.canDrawOverlays(this.getApplicationContext())) {
             this.PERMISSION_GRANTED = true;
         }
@@ -62,7 +59,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
             case R.id.firstButton:
                 // launchApp(filteredPackages.get(4));
-
                 break;
             case R.id.secondButton:
                 // Toast.makeText(this, "firstClicked", Toast.LENGTH_SHORT).show();
