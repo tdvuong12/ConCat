@@ -14,8 +14,6 @@ import java.util.List;
 
 public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
     private Context context;
-    private String[] titles;
-    private int[] icons;
     private List<AppInfo> appInfos;
 
     public MyAdapter(Context c, List<AppInfo> appInfos) {
