@@ -3,18 +3,26 @@
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener, View.OnLongClickListener {
 
+    private static final int WINDOW_PERMISSION = 123;
+    private static boolean PERMISSION_GRANTED = true;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        Button widget = findViewById(R.id.ConCat);
+        widget.setOnClickListener(this);
         Button firstBtn = findViewById(R.id.firstButton);
         firstBtn.setOnClickListener(this);
         Button secondBtn = findViewById(R.id.secondButton);
@@ -25,10 +33,33 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         fourthBtn.setOnClickListener(this);
     }
 
+    private void askForSystemOverlayPermission(){
+        Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                Uri.parse("package:" + getPackageName()));
+        startActivityForResult(intent, WINDOW_PERMISSION);
+        /**
+         * Requiring API of at least 23 instead of 16
+         */
+        if (Settings.canDrawOverlays(this.getApplicationContext())) {
+            this.PERMISSION_GRANTED = true;
+        }
+    }
+
     @Override
     public void onClick(View v) {
         TextView display = findViewById(R.id.display);
         switch (v.getId()) {
+            case R.id.ConCat:
+                if (PERMISSION_GRANTED == false) {
+                    askForSystemOverlayPermission();
+                    break;
+                }
+                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M || Settings.canDrawOverlays(this)) {
+                    startService(new Intent(MainActivity.this, FloatingViewService.class));
+                } else {
+                    askForSystemOverlayPermission();
+                }
+                break;
             case R.id.firstButton:
                 // launchApp(filteredPackages.get(4));
 
