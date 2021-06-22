@@ -1,6 +1,8 @@
 package com.example.myapplication;
 
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
@@ -21,6 +23,8 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.appbar.AppBarLayout;
 import com.google.android.material.appbar.CollapsingToolbarLayout;
@@ -29,6 +33,9 @@ import com.google.android.material.snackbar.Snackbar;
 
 import com.example.myapplication.databinding.ActivityScrollingBinding;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import static android.content.ContentValues.TAG;
 
 public class ScrollingActivity extends AppCompatActivity implements AppBarLayout.OnOffsetChangedListener {
@@ -36,12 +43,16 @@ public class ScrollingActivity extends AppCompatActivity implements AppBarLayout
     private ActivityScrollingBinding binding;
     private ActionBar actionBar;
 
-    ListView applicationListView;
     String[] applicationNames = { "Google", "Facebook", "Google", "Facebook", "Google", "Facebook", "Google", "Facebook",
             "Google", "Facebook", "Google", "Facebook"};
     int[] applicationIcons = { R.mipmap.ic_launcher, R.mipmap.ic_launcher, R.mipmap.ic_launcher, R.mipmap.ic_launcher,
             R.mipmap.ic_launcher, R.mipmap.ic_launcher, R.mipmap.ic_launcher, R.mipmap.ic_launcher,
             R.mipmap.ic_launcher, R.mipmap.ic_launcher, R.mipmap.ic_launcher, R.mipmap.ic_launcher };
+
+    RecyclerView applicationRecyclerView;
+    List<ApplicationInfo> packages;
+    List<ApplicationInfo> filteredPackages;
+    List<AppInfo> appInfos;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,21 +78,35 @@ public class ScrollingActivity extends AppCompatActivity implements AppBarLayout
         AppBarLayout appBarLayout = findViewById(R.id.app_bar);
         appBarLayout.addOnOffsetChangedListener(this);
 
-        applicationListView = findViewById(R.id.applicationListView);
+        // =========================================================================================
 
-        ApplicationAdapter adapter = new ApplicationAdapter(this, applicationNames, applicationIcons);
+        final PackageManager pm = getPackageManager();
 
-        applicationListView.setAdapter(adapter);
-        applicationListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                if (position == 0) {
-                    Toast.makeText(ScrollingActivity.this, "Facebook", Toast.LENGTH_SHORT).show();
-                } else if (position == 1) {
-                    Toast.makeText(ScrollingActivity.this, "Google", Toast.LENGTH_SHORT).show();
-                }
-            }
-        });
+        packages = pm.getInstalledApplications(PackageManager.GET_META_DATA);
+
+        filteredPackages = packages.stream()
+                .filter(packageInfo -> pm.getLaunchIntentForPackage(packageInfo.packageName) != null)
+                .collect(Collectors.toList());
+
+        for (ApplicationInfo app: filteredPackages) {
+            Log.d(TAG, "Launchable apps: " + app.packageName);
+        }
+
+        Log.d(TAG, String.valueOf(filteredPackages.size()));
+
+        appInfos = filteredPackages.stream()
+                .map(packageInfo -> new AppInfo(this, packageInfo, pm))
+                .collect(Collectors.toList());
+
+        // =========================================================================================
+
+        applicationRecyclerView = findViewById(R.id.applicationRecyclerView);
+
+        MyAdapter myAdapter = new MyAdapter(this, appInfos);
+
+        applicationRecyclerView.setAdapter(myAdapter);
+        applicationRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+
     }
 
     @Override
@@ -112,33 +137,6 @@ public class ScrollingActivity extends AppCompatActivity implements AppBarLayout
         }
         else {
             actionBar.setDisplayHomeAsUpEnabled(false);
-        }
-    }
-
-    class ApplicationAdapter extends ArrayAdapter<String> {
-        private Context context;
-        private String[] names;
-        private int[] icons;
-
-        ApplicationAdapter (Context c, String[] names, int[] icons){
-            super(c, R.layout.row, R.id.title, names);
-            this.context = c;
-            this.names = names;
-            this.icons = icons;
-        }
-
-        @NonNull
-        @Override
-        public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
-            LayoutInflater layoutInflater = (LayoutInflater) getApplicationContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            View row = layoutInflater.inflate(R.layout.row, parent, false);
-            ImageView icon = row.findViewById(R.id.icon);
-            TextView name = row.findViewById(R.id.title);
-
-            icon.setImageResource(icons[position]);
-            name.setText(names[position]);
-
-            return row;
         }
     }
 }

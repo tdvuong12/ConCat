@@ -22,9 +22,6 @@ import static android.content.ContentValues.TAG;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener, View.OnLongClickListener {
 
-    List<ApplicationInfo> packages;
-    List<ApplicationInfo> filteredPackages;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -38,20 +35,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         thirdBtn.setOnClickListener(this);
         Button fourthBtn = findViewById(R.id.fourthButton);
         fourthBtn.setOnClickListener(this);
-
-        final PackageManager pm = getPackageManager();
-
-        packages = pm.getInstalledApplications(PackageManager.GET_META_DATA);
-
-        filteredPackages = packages.stream()
-            .filter(packageInfo -> pm.getLaunchIntentForPackage(packageInfo.packageName) != null)
-            .collect(Collectors.toList());
-
-        for (ApplicationInfo app: filteredPackages) {
-            Log.d(TAG, "Launchable apps: " + app.packageName);
-        }
-
-        Log.d(TAG, String.valueOf(filteredPackages.size()));
     }
 
     @Override
@@ -59,18 +42,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         TextView display = findViewById(R.id.display);
         switch (v.getId()) {
             case R.id.firstButton:
-                launchApp(filteredPackages.get(4));
+                // launchApp(filteredPackages.get(4));
 
                 break;
             case R.id.secondButton:
                 // Toast.makeText(this, "firstClicked", Toast.LENGTH_SHORT).show();
                 display.setText("secondClicked");
+                startActivity(new Intent(this, ScrollingActivity.class));
                 break;
             case R.id.thirdButton:
                 // Toast.makeText(this, "firstClicked", Toast.LENGTH_SHORT).show();
                 display.setText("thirdClicked");
-                // startActivity(new Intent(MainActivity.this, com.example.myapplication.List.class));
-                startActivity(new Intent(MainActivity.this, ScrollingActivity.class));
                 break;
             case R.id.fourthButton:
                 // Toast.makeText(this, "firstClicked", Toast.LENGTH_SHORT).show();
@@ -86,18 +68,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         return false;
     }
 
-    private void launchApp(ApplicationInfo packagesInfo) {
-        Intent mIntent = getPackageManager().getLaunchIntentForPackage(packagesInfo.packageName);
-        if (mIntent != null) {
-            try {
-                startActivity(mIntent);
-            } catch (ActivityNotFoundException err) {
-                Toast t = Toast.makeText(getApplicationContext(),
-                        R.string.app_not_found, Toast.LENGTH_SHORT);
-                t.show();
-            }
-        } else {
-            Log.d(TAG, "nope");
-        }
-    }
+    //    private void launchApp(ApplicationInfo packagesInfo) {
+//        Intent mIntent = getPackageManager().getLaunchIntentForPackage(packagesInfo.packageName);
+//        if (mIntent != null) {
+//            try {
+//                startActivity(mIntent);
+//            } catch (ActivityNotFoundException err) {
+//                Toast t = Toast.makeText(getApplicationContext(),
+//                        R.string.app_not_found, Toast.LENGTH_SHORT);
+//                t.show();
+//            }
+//        } else {
+//            Log.d(TAG, "nope");
+//        }
+//    }
 }
