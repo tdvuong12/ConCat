@@ -64,3 +64,13 @@ choice, swiping the widget will also allow our application to perform
 and repeat multi-stage tasks upon triggering the floating widget. In
 doing so, we will need permission to access user’s data and other
 applications on the phone.
+
+## Proposed restructuring of README and Milestone report:
+
+* Motivation and Purpose
+* Aim
+* User stories (continued) - need at least 4
+* Complete set of features and explanation - tools used during the process of development
+  1. Widget
+  2. App launcher
+* Explaining user flow and reference
