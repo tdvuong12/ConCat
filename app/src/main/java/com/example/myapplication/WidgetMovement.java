@@ -45,8 +45,8 @@ public class WidgetMovement extends Activity implements View.OnTouchListener {
         this.expandedView = expandedView;
     }
 
-    public void setPackageManager(PackageManager packageManager) {
-        this.packageManager = packageManager;
+    public void setCoordinate() {
+
     }
 
     /**
@@ -58,17 +58,13 @@ public class WidgetMovement extends Activity implements View.OnTouchListener {
     @Override
     public boolean onTouch(View v, MotionEvent event) {
         Display display = mWindowManager.getDefaultDisplay();
+
+        // get the 4 maximum coordinate value of the phone screen
         float maxX = (float) 0.5 * display.getWidth();
         float minX = -maxX;
         float maxY = (float) 0.5 * display.getHeight();
         float minY = -maxY;
-        switch (v.getId()) {
-            case R.id.collapsed_iv:
-                collapsedView.setVisibility(View.GONE);
-                expandedView.setVisibility(View.VISIBLE);
-                Log.i("", "on Clicking");
-                return true;
-        }
+
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
                 initialX = params.x;
@@ -88,13 +84,9 @@ public class WidgetMovement extends Activity implements View.OnTouchListener {
                 mWindowManager.updateViewLayout(mOverlayView, params);
                 return true;
             case MotionEvent.ACTION_UP:
-                /**
-                 * Need to differentiate time and all that
-                 */
-                /*
-                collapsedView.setVisibility(View.GONE);
-                expandedView.setVisibility(View.VISIBLE);
-                 */
+                float closestWall = params.x >= 0 ? maxX : minX;
+                params.x = (int) closestWall;
+                mWindowManager.updateViewLayout(mOverlayView, params);
                 if (event.getEventTime() - event.getDownTime() <= CLICK_THRESHOLD) {
                     v.setOnClickListener(new View.OnClickListener() {
                         @Override
@@ -106,23 +98,10 @@ public class WidgetMovement extends Activity implements View.OnTouchListener {
                     v.performClick();
                     Log.i("", "Button clicked");
                     return false;
-                }
-                if (params.x < 0) {
-                    if (Math.abs(params.x) < Math.abs(params.y)) {
-                        params.x = (int) minX;
-                    } else {
-                        params.y = (int) minY;
-                    }
                 } else {
-                    if (Math.abs(params.x) < Math.abs(params.y)) {
-                        params.x = (int) maxX;
-                    } else {
-                        params.y = (int) maxY;
-                    }
+                    Log.i("", "Button moved");
+                    return true;
                 }
-
-                Log.i("", "Finished actions");
-                return true;
         }
         return false;
     }

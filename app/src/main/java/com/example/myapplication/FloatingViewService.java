@@ -3,12 +3,17 @@ package com.example.myapplication;
 import android.app.Service;
 import android.content.Intent;
 import android.graphics.PixelFormat;
+import android.graphics.Point;
 import android.os.IBinder;
 import android.util.Log;
+import android.view.Display;
 import android.view.DragEvent;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewTreeObserver;
 import android.view.WindowManager;
+import android.widget.RelativeLayout;
 
 public class FloatingViewService extends Service
         implements View.OnClickListener, View.OnDragListener {
@@ -25,6 +30,8 @@ public class FloatingViewService extends Service
     private View collapsedView;
     private View expandedView;
 
+    private int mWidth = 0;
+
     @Override
     public boolean onDrag(View v, DragEvent event) {
         return false;
@@ -34,44 +41,107 @@ public class FloatingViewService extends Service
 
     }
 
-    public void onCreate(){
+    @Override
+    public void onCreate() {
         super.onCreate();
+        if (mFloatingView == null) {
+            mFloatingView = LayoutInflater.from(this).inflate(R.layout.layout_floating_widget, null);
+            final WindowManager.LayoutParams params = new WindowManager.LayoutParams(
+                    WindowManager.LayoutParams.WRAP_CONTENT,
+                    WindowManager.LayoutParams.WRAP_CONTENT,
+                    WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
+                    WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+                    PixelFormat.TRANSLUCENT
+            );
+            mWindowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
+            mWindowManager.addView(mFloatingView, params);
 
-        /** Getting the widget layout from xml using layout inflater
-         * param refers to the layout setting that the window manager is supposed to
-         * cross apart.
-         * First two parameters refer to how much should the window envelop the content.
-         * Here, the window is shrink so that it can wrap the content enough but not fill the screen
-         * May need to change the parameter and flag name so that the layout allows
-         * applications to be launched.
-         */
-        mFloatingView = LayoutInflater.from(this).inflate(R.layout.layout_floating_widget, null);
-        final WindowManager.LayoutParams params = new WindowManager.LayoutParams(
-                WindowManager.LayoutParams.WRAP_CONTENT,
-                WindowManager.LayoutParams.WRAP_CONTENT,
-                WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
-                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
-                PixelFormat.TRANSLUCENT
-        );
+            // getting the collapsed and expanded view
+            collapsedView = mFloatingView.findViewById(R.id.layoutCollapsed);
+            expandedView = mFloatingView.findViewById(R.id.layoutExpanded);
 
-        // getting window services and add the floating view to it
-        mWindowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
-        mWindowManager.addView(mFloatingView, params);
+            //adding click listener to close button and expanded view
+            mFloatingView.findViewById(R.id.buttonClose).setOnClickListener(this);
+            expandedView.setOnClickListener(this);
 
-        // getting the collapsed and expanded view
-        collapsedView = mFloatingView.findViewById(R.id.layoutCollapsed);
-        expandedView = mFloatingView.findViewById(R.id.layoutExpanded);
+            Display display = mWindowManager.getDefaultDisplay();
+            Point size = new Point();
+            display.getSize(size);
 
-        //adding click listener to close button and expanded view
-        mFloatingView.findViewById(R.id.buttonClose).setOnClickListener(this);
-        expandedView.setOnClickListener(this);
+            /*
+            final RelativeLayout relativeLayout = mFloatingView.findViewById(R.id.layout);
+            ViewTreeObserver viewTreeObserver = relativeLayout.getViewTreeObserver();
+            viewTreeObserver.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+                @Override
+                public void onGlobalLayout() {
+                    relativeLayout.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                    int width = relativeLayout.getMeasuredWidth();
+                    mWidth = size.x - width;
+                }
+            });
 
-        // adding touch listener for drag movement
-        WidgetMovement widgetMovement = new WidgetMovement();
-        widgetMovement.setParams(mWindowManager, mFloatingView, params);
-        widgetMovement.setViews(collapsedView, expandedView);
-        mFloatingView.findViewById(R.id.relativeLayoutParent).
-                setOnTouchListener(widgetMovement);
+             */
+
+            // adding touch listener for drag movement
+            WidgetMovement widgetMovement = new WidgetMovement();
+            widgetMovement.setParams(mWindowManager, mFloatingView, params);
+            widgetMovement.setViews(collapsedView, expandedView);
+            mFloatingView.findViewById(R.id.relativeLayoutParent).setOnTouchListener(new View.OnTouchListener() {
+                private int initialX;
+                private int initialY;
+                private float initialTouchX;
+                private float initialTouchY;
+                private static final int CLICK_THRESHOLD = 200;
+                @Override
+                public boolean onTouch(View v, MotionEvent event) {
+                    // get the 4 maximum coordinate value of the phone screen
+                    float maxX = (float) 0.5 * display.getWidth();
+                    float minX = -maxX;
+                    float maxY = (float) 0.5 * display.getHeight();
+                    float minY = -maxY;
+                    switch (event.getAction()) {
+                        case MotionEvent.ACTION_DOWN:
+                            initialX = params.x;
+                            initialY = params.y;
+                            initialTouchX = event.getRawX();
+                            initialTouchY = event.getRawY();
+                            Log.i("", "Started action");
+                            Log.i("", initialX + "" + initialY);
+                            return true;
+                        case MotionEvent.ACTION_MOVE:
+                            int xDiff = Math.round(event.getRawX() - initialTouchX);
+                            int yDiff = Math.round(event.getRawY() - initialTouchY);
+                            params.x = initialX + (int) xDiff;
+                            params.y = initialY + (int) yDiff;
+                            Log.i("", params.x + " and " + params.y);
+                            Log.i("", xDiff + " and " + yDiff);
+                            mWindowManager.updateViewLayout(mFloatingView, params);
+                            return true;
+                        case MotionEvent.ACTION_UP:
+                            float closestWall = params.x >= 0 ? maxX : minX;
+                            params.x = (int) closestWall;
+                            mWindowManager.updateViewLayout(mFloatingView, params);
+                            if (event.getEventTime() - event.getDownTime() <= CLICK_THRESHOLD) {
+                                v.setOnClickListener(new View.OnClickListener() {
+                                    @Override
+                                    public void onClick(View v) {
+                                        collapsedView.setVisibility(View.GONE);
+                                        expandedView.setVisibility(View.VISIBLE);
+                                    }
+                                });
+                                v.performClick();
+                                Log.i("", "Button clicked");
+                                return false;
+                            } else {
+                                Log.i("", "Button moved");
+                                return true;
+                            }
+                        default:
+                            return false;
+                    }
+                }
+            });
+        }
     }
 
     @Override
