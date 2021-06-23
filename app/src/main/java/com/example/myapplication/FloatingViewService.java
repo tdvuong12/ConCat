@@ -24,7 +24,8 @@ public class FloatingViewService extends Service
      * mFloatingView: Design, action, and algorithms relating to the floating widget
      * collapsedView:
      * expandedView:
-     */
+     vtd*/
+
     private WindowManager mWindowManager;
     private View mFloatingView;
     private View collapsedView;
