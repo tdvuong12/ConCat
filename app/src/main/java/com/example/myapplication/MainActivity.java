@@ -8,46 +8,29 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
-public class MainActivity extends AppCompatActivity implements View.OnClickListener, View.OnLongClickListener {
+import java.util.ArrayList;
+import java.util.List;
+
+ public class MainActivity extends AppCompatActivity implements View.OnLongClickListener {
+
+    Button[] buttonList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        final AppInfo emptyApp = AppInfo.none(this);
+
         Button firstBtn = findViewById(R.id.firstButton);
-        firstBtn.setOnClickListener(this);
         Button secondBtn = findViewById(R.id.secondButton);
-        secondBtn.setOnClickListener(this);
         Button thirdBtn = findViewById(R.id.thirdButton);
-        thirdBtn.setOnClickListener(this);
         Button fourthBtn = findViewById(R.id.fourthButton);
-        fourthBtn.setOnClickListener(this);
-    }
 
-    @Override
-    public void onClick(View v) {
-        TextView display = findViewById(R.id.display);
-        switch (v.getId()) {
-            case R.id.firstButton:
-                // launchApp(filteredPackages.get(4));
+        buttonList = new Button[] { firstBtn, secondBtn, thirdBtn, fourthBtn };
 
-                break;
-            case R.id.secondButton:
-                // Toast.makeText(this, "firstClicked", Toast.LENGTH_SHORT).show();
-                display.setText("secondClicked");
-                startActivity(new Intent(this, ScrollingActivity.class));
-                break;
-            case R.id.thirdButton:
-                // Toast.makeText(this, "firstClicked", Toast.LENGTH_SHORT).show();
-                display.setText("thirdClicked");
-                break;
-            case R.id.fourthButton:
-                // Toast.makeText(this, "firstClicked", Toast.LENGTH_SHORT).show();
-                display.setText("fourthClicked");
-                break;
-            default:
-                break;
+        for (Button btn: buttonList) {
+            emptyApp.setButton(btn);
         }
     }
 

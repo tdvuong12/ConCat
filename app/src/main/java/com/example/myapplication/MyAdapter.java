@@ -1,6 +1,7 @@
 package com.example.myapplication;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.util.Log;
@@ -8,6 +9,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -22,10 +24,12 @@ import static android.content.ContentValues.TAG;
 public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
     private Context context;
     private List<AppInfo> appInfos;
+    private Button btn;
 
-    public MyAdapter(Context c, List<AppInfo> appInfos) {
+    public MyAdapter(Context c, List<AppInfo> appInfos, Button btn) {
         this.context = c;
         this.appInfos = appInfos;
+        this.btn = btn;
     }
 
     @NonNull
@@ -46,11 +50,8 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
             Log.d(TAG, e.toString());
         }
 
-        holder.rowLayout.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                app.launch();
-            }
+        holder.rowLayout.setOnClickListener(v -> {
+            app.setButton(btn);
         });
     }
 

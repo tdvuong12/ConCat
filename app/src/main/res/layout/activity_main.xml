@@ -14,7 +14,7 @@
         android:layout_centerHorizontal="true"
         android:layout_marginTop="150dp"
         android:textSize="40sp"
-        android:text="Display"></TextView>
+        android:text="Display"/>
 
     <Button
         android:id="@+id/ConCat"
@@ -24,8 +24,8 @@
         android:layout_centerHorizontal="true"
         android:layout_marginTop="100dp"
         android:text="ConCat"
-        android:background="@android:color/holo_red_light"
-        ></Button>
+
+        />
 
     <Button
         android:id="@+id/firstButton"
@@ -34,8 +34,7 @@
         android:layout_below="@+id/ConCat"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="@dimen/distance"
-        android:text="Say Hello"
-        ></Button>
+        />
 
     <Button
         android:id="@+id/secondButton"
@@ -44,8 +43,7 @@
         android:layout_below="@+id/firstButton"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="@dimen/distance"
-        android:text="Say Hello"
-        ></Button>
+        />
 
     <Button
         android:id="@+id/thirdButton"
@@ -54,8 +52,7 @@
         android:layout_below="@+id/secondButton"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="@dimen/distance"
-        android:text="Say Hello"
-        ></Button>
+        />
 
     <Button
         android:id="@+id/fourthButton"
@@ -64,8 +61,7 @@
         android:layout_below="@+id/thirdButton"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="@dimen/distance"
-        android:text="Say Hello"
-        ></Button>
+        />
 
 
 </RelativeLayout>
