@@ -1,5 +1,6 @@
 package com.example.myapplication;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
@@ -13,8 +14,11 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ComponentActivity;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.List;
@@ -24,12 +28,10 @@ import static android.content.ContentValues.TAG;
 public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
     private Context context;
     private List<AppInfo> appInfos;
-    private Button btn;
 
-    public MyAdapter(Context c, List<AppInfo> appInfos, Button btn) {
+    public MyAdapter(Context c, List<AppInfo> appInfos) {
         this.context = c;
         this.appInfos = appInfos;
-        this.btn = btn;
     }
 
     @NonNull
@@ -43,15 +45,22 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
     @Override
     public void onBindViewHolder(@NonNull MyAdapter.MyViewHolder holder, int position) {
         AppInfo app = appInfos.get(position);
-        holder.title.setText(app.getLabel());
         try {
-            holder.icon.setImageDrawable(app.getIcon());
+            holder.title.setText(app.getLabel(this.context));
+            holder.icon.setImageDrawable(app.getIcon(this.context));
         } catch (PackageManager.NameNotFoundException e) {
             Log.d(TAG, e.toString());
         }
 
         holder.rowLayout.setOnClickListener(v -> {
-            app.setButton(btn);
+            AppCompatActivity c = (AppCompatActivity) context;
+            Intent intent = new Intent(c, MainActivity.class);
+            intent.putExtra("app", app);
+
+            int buttonID = c.getIntent().getIntExtra("Button ID", 0);
+            intent.putExtra("Button ID", buttonID);
+
+            c.startActivity(intent);
         });
     }
 

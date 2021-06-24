@@ -11,122 +11,130 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AppCompatActivity;
+
+import java.io.Serializable;
+
 import static android.content.ContentValues.TAG;
 
-public abstract class AppInfo {
-    private Context c;
+public abstract class AppInfo implements Serializable {
 
-    public static final class SomeAppInfo extends AppInfo {
+    public static final String EMPTY = "empty";
+
+    public static final class SomeAppInfo extends AppInfo implements Serializable {
         private String name;
-        private ApplicationInfo applicationInfo;
-        private PackageManager pm;
 
-        private SomeAppInfo(Context c, ApplicationInfo applicationInfo, PackageManager pm) {
-            super.c = c;
-            this.applicationInfo = applicationInfo;
-            this.pm = pm;
+        private SomeAppInfo(ApplicationInfo applicationInfo) {
             this.name = applicationInfo.packageName;
         }
 
-        @Override
-        public Drawable getIcon() throws PackageManager.NameNotFoundException {
-            return pm.getApplicationIcon(this.name);
+        private SomeAppInfo(String name) {
+            this.name = name;
         }
 
         @Override
-        public String getLabel() {
-            return (String) pm.getApplicationLabel(applicationInfo);
+        public Drawable getIcon(Context context) throws PackageManager.NameNotFoundException {
+            return context.getPackageManager().getApplicationIcon(this.name);
         }
 
-        private void launch() {
+        @Override
+        public String getLabel(Context context) throws PackageManager.NameNotFoundException {
+            PackageManager pm = context.getPackageManager();
+            return (String) pm.getApplicationLabel(pm.getApplicationInfo(this.name, 0));
+        }
+
+        private void launch(Context context) {
             try {
-                super.c.startActivity(pm.getLaunchIntentForPackage(this.name));
+                context.startActivity(context.getPackageManager().getLaunchIntentForPackage(this.name));
             } catch (ActivityNotFoundException err) {
-                Toast t = Toast.makeText(super.c,
+                Toast t = Toast.makeText(context,
                         R.string.app_not_found, Toast.LENGTH_SHORT);
                 t.show();
             }
         }
 
         @Override
-        public void setButton(Button btn) {
-//            Log.d(TAG, "some app info");
-//
-//            Log.d(TAG, Boolean.toString(this.getLabel() == null));
-//
-//            btn.setText(this.getLabel());
-//
-//            btn.setOnClickListener(new View.OnClickListener() {
-//                @Override
-//                public void onClick(View v) {
-//                    SomeAppInfo.this.launch();
-//                }
-//            });
-//
-//            btn.setOnLongClickListener(v -> {
-//                SomeAppInfo.super.c.startActivity(new Intent(SomeAppInfo.super.c, ScrollingActivity.class));
-//                return false;
-//            });
+        public void setButton(Context context, Button btn) {
+            try {
+                btn.setText(this.getLabel(context));
+            } catch (PackageManager.NameNotFoundException e) {
+                Log.d(TAG, e.toString());
+            }
 
-            btn.setOnClickListener(v -> {
-                Toast.makeText(SomeAppInfo.super.c, "Empty Button! Hold to choose app", Toast.LENGTH_SHORT).show();
-            });
+            btn.setOnClickListener(v -> this.launch(context));
 
             btn.setOnLongClickListener(v -> {
-                Intent intent = new Intent(SomeAppInfo.super.c, ScrollingActivity.class);
+                Intent intent = new Intent(context, ScrollingActivity.class);
                 intent.putExtra("Button ID", btn.getId());
-                SomeAppInfo.super.c.startActivity(intent);
+                context.startActivity(intent);
                 return false;
             });
+        }
 
-            btn.setText("set");
-
+        @Override
+        public String getName() {
+            return this.name;
         }
     }
 
-    public static class EmptyApp extends AppInfo {
-        private EmptyApp(Context c) {
-            super.c = c;
-        }
+    public static class EmptyApp extends AppInfo implements Serializable {
+        private EmptyApp() { }
 
         @Override
-        public Drawable getIcon() {
+        public Drawable getIcon(Context context) {
             return null;
         }
 
         @Override
-        public String getLabel() {
+        public String getLabel(Context context) {
             return null;
         }
 
         @Override
-        public void setButton(Button btn) {
+        public void setButton(Context context, Button btn) {
             btn.setOnClickListener(v -> {
-                Toast.makeText(EmptyApp.super.c, "Empty Button! Hold to choose app", Toast.LENGTH_SHORT).show();
+                Toast.makeText(context, "Empty Button! Hold to choose app", Toast.LENGTH_SHORT).show();
             });
 
             btn.setOnLongClickListener(v -> {
-                Intent intent = new Intent(EmptyApp.super.c, ScrollingActivity.class);
+                Intent intent = new Intent(context, ScrollingActivity.class);
                 intent.putExtra("Button ID", btn.getId());
-                EmptyApp.super.c.startActivity(intent);
+                context.startActivity(intent);
                 return false;
             });
 
             btn.setText("empty button");
         }
+
+        @Override
+        public String getName() {
+            return EMPTY;
+        }
     }
 
-    public static AppInfo none(Context c) {
-        return new EmptyApp(c);
+    private static final AppInfo NONE = new EmptyApp();
+
+    public static AppInfo none() {
+        return NONE;
     }
 
-    public static AppInfo some(Context c, ApplicationInfo applicationInfo, PackageManager pm) {
-        return new SomeAppInfo(c, applicationInfo, pm);
+    public static AppInfo some(ApplicationInfo applicationInfo) {
+        return new SomeAppInfo(applicationInfo);
     }
 
-    public abstract Drawable getIcon() throws PackageManager.NameNotFoundException;
+    public static AppInfo of(String name) {
+        if (name.equals(EMPTY)) {
+            return none();
+        } else {
+            return new SomeAppInfo(name);
+        }
+    }
 
-    public abstract String getLabel();
+    public abstract Drawable getIcon(Context context) throws PackageManager.NameNotFoundException;
 
-    public abstract void setButton(Button btn);
+    public abstract String getLabel(Context context) throws PackageManager.NameNotFoundException;
+
+    public abstract void setButton(Context context, Button btn);
+
+    public abstract String getName();
 }

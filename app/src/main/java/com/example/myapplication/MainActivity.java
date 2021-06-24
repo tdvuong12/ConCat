@@ -1,48 +1,64 @@
  package com.example.myapplication;
 
+import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import java.util.HashMap;
+import java.util.Set;
+
+import static android.content.ContentValues.TAG;
 
  public class MainActivity extends AppCompatActivity
-         implements View.OnClickListener, View.OnLongClickListener {
+     implements View.OnClickListener, View.OnLongClickListener {
 
-    Button[] buttonList;
+    int[] buttonIDs;
 
     private static final int WINDOW_PERMISSION = 123;
     private static boolean PERMISSION_GRANTED = true;
 
-    // Hello
+    public static final String SHARED_PREFS = "sharedPrefs";
+
+    private HashMap<Integer, String> hashMapNames = new HashMap<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        final AppInfo emptyApp = AppInfo.none(this);
+        buttonIDs = new int[] { R.id.firstButton, R.id.secondButton, R.id.thirdButton, R.id.fourthButton };
+
+        loadData();
+
+        AppInfo appInfo = (AppInfo) getIntent().getSerializableExtra("app");
+        int buttonID = getIntent().getIntExtra("Button ID", 0);
+        if ((appInfo != null) && (hashMapNames.containsKey(buttonID))) {
+            hashMapNames.remove(buttonID);
+            hashMapNames.put(buttonID, appInfo.getName());
+        }
 
         Button conCat = findViewById(R.id.ConCat);
         conCat.setOnClickListener(this);
-        Button firstBtn = findViewById(R.id.firstButton);
-        Button secondBtn = findViewById(R.id.secondButton);
-        Button thirdBtn = findViewById(R.id.thirdButton);
-        Button fourthBtn = findViewById(R.id.fourthButton);
 
-        buttonList = new Button[]{firstBtn, secondBtn, thirdBtn, fourthBtn};
-
-        for (Button btn : buttonList) {
-            emptyApp.setButton(btn);
+        for (int btnID: buttonIDs) {
+            AppInfo.of(hashMapNames.get(btnID)).setButton(this, findViewById(btnID));
         }
-    }
 
+        saveData();
+    }
 
     private void askForSystemOverlayPermission() {
         Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
@@ -77,5 +93,29 @@ import android.widget.TextView;
      @Override
      public boolean onLongClick(View v) {
          return false;
+     }
+
+     public void saveData() {
+         SharedPreferences sharedPreferences = getSharedPreferences(SHARED_PREFS, MODE_PRIVATE);
+         SharedPreferences.Editor editor = sharedPreferences.edit();
+
+         for (int btnID: buttonIDs) {
+             editor.putString(Integer.toString(btnID), hashMapNames.get(btnID));
+         }
+         editor.apply();
+     }
+
+     public void loadData() {
+         SharedPreferences sharedPreferences = getSharedPreferences(SHARED_PREFS, MODE_PRIVATE);
+         hashMapNames.clear();
+
+         for (int btnID: buttonIDs) {
+             hashMapNames.put(btnID, sharedPreferences.getString(Integer.toString(btnID), AppInfo.EMPTY));
+         }
+     }
+
+     @Override
+     protected void onDestroy() {
+         super.onDestroy();
      }
  }
