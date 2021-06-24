@@ -69,14 +69,14 @@ public class ScrollingActivity extends AppCompatActivity implements AppBarLayout
 
         appInfos = packages.stream()
                 .filter(packageInfo -> pm.getLaunchIntentForPackage(packageInfo.packageName) != null)
-                .map(packageInfo -> new AppInfo(this, packageInfo, pm))
+                .map(packageInfo -> AppInfo.some(this, packageInfo, pm))
                 .collect(Collectors.toList());
 
         // =========================================================================================
 
         applicationRecyclerView = findViewById(R.id.applicationRecyclerView);
 
-        MyAdapter myAdapter = new MyAdapter(this, appInfos);
+        MyAdapter myAdapter = new MyAdapter(this, appInfos, findViewById(getIntent().getIntExtra("Button ID", 0)));
 
         applicationRecyclerView.setAdapter(myAdapter);
         applicationRecyclerView.setLayoutManager(new LinearLayoutManager(this));

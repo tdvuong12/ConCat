@@ -12,7 +12,12 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
-public class MainActivity extends AppCompatActivity implements View.OnClickListener, View.OnLongClickListener {
+import java.util.ArrayList;
+import java.util.List;
+
+ public class MainActivity extends AppCompatActivity implements View.OnLongClickListener {
+
+    Button[] buttonList;
 
     private static final int WINDOW_PERMISSION = 123;
     private static boolean PERMISSION_GRANTED = true;
@@ -24,18 +29,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        Button widget = findViewById(R.id.ConCat);
-        widget.setOnClickListener(this);
-        Button firstBtn = findViewById(R.id.firstButton);
-        firstBtn.setOnClickListener(this);
-        Button secondBtn = findViewById(R.id.secondButton);
-        secondBtn.setOnClickListener(this);
-        Button thirdBtn = findViewById(R.id.thirdButton);
-        thirdBtn.setOnClickListener(this);
-        Button fourthBtn = findViewById(R.id.fourthButton);
-        fourthBtn.setOnClickListener(this);
-    }
+        final AppInfo emptyApp = AppInfo.none(this);
 
+        Button firstBtn = findViewById(R.id.firstButton);
+        Button secondBtn = findViewById(R.id.secondButton);
+        Button thirdBtn = findViewById(R.id.thirdButton);
+        Button fourthBtn = findViewById(R.id.fourthButton);
+
+        buttonList = new Button[] { firstBtn, secondBtn, thirdBtn, fourthBtn };
+
+        for (Button btn: buttonList) {
+            emptyApp.setButton(btn);
     private void askForSystemOverlayPermission(){
         Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
                 Uri.parse("package:" + getPackageName()));
