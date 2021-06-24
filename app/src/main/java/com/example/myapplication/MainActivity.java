@@ -3,6 +3,7 @@
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -15,6 +16,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private static final int WINDOW_PERMISSION = 123;
     private static boolean PERMISSION_GRANTED = true;
+
+    private ApplicationInfo[] appList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
