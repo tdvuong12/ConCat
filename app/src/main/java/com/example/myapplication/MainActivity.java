@@ -1,39 +1,66 @@
  package com.example.myapplication;
 
+import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.pm.ApplicationInfo;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
-public class MainActivity extends AppCompatActivity implements View.OnClickListener, View.OnLongClickListener {
+import java.util.HashMap;
+import java.util.Set;
+
+import static android.content.ContentValues.TAG;
+
+ public class MainActivity extends AppCompatActivity
+     implements View.OnClickListener, View.OnLongClickListener {
+
+    int[] buttonIDs;
 
     private static final int WINDOW_PERMISSION = 123;
     private static boolean PERMISSION_GRANTED = true;
+
+    public static final String SHARED_PREFS = "sharedPrefs";
+
+    private HashMap<Integer, String> hashMapNames = new HashMap<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        Button widget = findViewById(R.id.ConCat);
-        widget.setOnClickListener(this);
-        Button firstBtn = findViewById(R.id.firstButton);
-        firstBtn.setOnClickListener(this);
-        Button secondBtn = findViewById(R.id.secondButton);
-        secondBtn.setOnClickListener(this);
-        Button thirdBtn = findViewById(R.id.thirdButton);
-        thirdBtn.setOnClickListener(this);
-        Button fourthBtn = findViewById(R.id.fourthButton);
-        fourthBtn.setOnClickListener(this);
+        buttonIDs = new int[] { R.id.firstButton, R.id.secondButton, R.id.thirdButton, R.id.fourthButton };
+
+        loadData();
+
+        AppInfo appInfo = (AppInfo) getIntent().getSerializableExtra("app");
+        int buttonID = getIntent().getIntExtra("Button ID", 0);
+        if ((appInfo != null) && (hashMapNames.containsKey(buttonID))) {
+            hashMapNames.remove(buttonID);
+            hashMapNames.put(buttonID, appInfo.getName());
+        }
+
+        Button conCat = findViewById(R.id.ConCat);
+        conCat.setOnClickListener(this);
+
+        for (int btnID: buttonIDs) {
+            AppInfo.of(hashMapNames.get(btnID)).setButton(this, findViewById(btnID));
+        }
+
+        saveData();
     }
 
-    private void askForSystemOverlayPermission(){
+    private void askForSystemOverlayPermission() {
         Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
                 Uri.parse("package:" + getPackageName()));
         startActivityForResult(intent, WINDOW_PERMISSION);
@@ -41,6 +68,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             this.PERMISSION_GRANTED = true;
         }
     }
+
 
     @Override
     public void onClick(View v) {
@@ -57,29 +85,37 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     askForSystemOverlayPermission();
                 }
                 break;
-            case R.id.firstButton:
-                // launchApp(filteredPackages.get(4));
-                break;
-            case R.id.secondButton:
-                // Toast.makeText(this, "firstClicked", Toast.LENGTH_SHORT).show();
-                display.setText("secondClicked");
-                startActivity(new Intent(this, ScrollingActivity.class));
-                break;
-            case R.id.thirdButton:
-                // Toast.makeText(this, "firstClicked", Toast.LENGTH_SHORT).show();
-                display.setText("thirdClicked");
-                break;
-            case R.id.fourthButton:
-                // Toast.makeText(this, "firstClicked", Toast.LENGTH_SHORT).show();
-                display.setText("fourthClicked");
-                break;
             default:
                 break;
         }
     }
 
-    @Override
-    public boolean onLongClick(View v) {
-        return false;
-    }
-}
+     @Override
+     public boolean onLongClick(View v) {
+         return false;
+     }
+
+     public void saveData() {
+         SharedPreferences sharedPreferences = getSharedPreferences(SHARED_PREFS, MODE_PRIVATE);
+         SharedPreferences.Editor editor = sharedPreferences.edit();
+
+         for (int btnID: buttonIDs) {
+             editor.putString(Integer.toString(btnID), hashMapNames.get(btnID));
+         }
+         editor.apply();
+     }
+
+     public void loadData() {
+         SharedPreferences sharedPreferences = getSharedPreferences(SHARED_PREFS, MODE_PRIVATE);
+         hashMapNames.clear();
+
+         for (int btnID: buttonIDs) {
+             hashMapNames.put(btnID, sharedPreferences.getString(Integer.toString(btnID), AppInfo.EMPTY));
+         }
+     }
+
+     @Override
+     protected void onDestroy() {
+         super.onDestroy();
+     }
+ }

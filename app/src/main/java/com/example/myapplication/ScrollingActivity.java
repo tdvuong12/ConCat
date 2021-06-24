@@ -9,6 +9,8 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
+import android.widget.Toast;
 
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
@@ -23,12 +25,14 @@ import com.google.android.material.snackbar.Snackbar;
 
 import com.example.myapplication.databinding.ActivityScrollingBinding;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import static android.content.ContentValues.TAG;
 
-public class ScrollingActivity extends AppCompatActivity implements AppBarLayout.OnOffsetChangedListener {
+public class ScrollingActivity extends AppCompatActivity
+        implements AppBarLayout.OnOffsetChangedListener {
 
     private ActivityScrollingBinding binding;
     private ActionBar actionBar;
@@ -69,7 +73,7 @@ public class ScrollingActivity extends AppCompatActivity implements AppBarLayout
 
         appInfos = packages.stream()
                 .filter(packageInfo -> pm.getLaunchIntentForPackage(packageInfo.packageName) != null)
-                .map(packageInfo -> new AppInfo(this, packageInfo, pm))
+                .map(packageInfo -> AppInfo.some(packageInfo))
                 .collect(Collectors.toList());
 
         // =========================================================================================

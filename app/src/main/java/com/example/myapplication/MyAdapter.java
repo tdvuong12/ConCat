@@ -1,6 +1,8 @@
 package com.example.myapplication;
 
+import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.util.Log;
@@ -8,11 +10,15 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ComponentActivity;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.List;
@@ -39,18 +45,22 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
     @Override
     public void onBindViewHolder(@NonNull MyAdapter.MyViewHolder holder, int position) {
         AppInfo app = appInfos.get(position);
-        holder.title.setText(app.getLabel());
         try {
-            holder.icon.setImageDrawable(app.getIcon());
+            holder.title.setText(app.getLabel(this.context));
+            holder.icon.setImageDrawable(app.getIcon(this.context));
         } catch (PackageManager.NameNotFoundException e) {
             Log.d(TAG, e.toString());
         }
 
-        holder.rowLayout.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                app.launch();
-            }
+        holder.rowLayout.setOnClickListener(v -> {
+            AppCompatActivity c = (AppCompatActivity) context;
+            Intent intent = new Intent(c, MainActivity.class);
+            intent.putExtra("app", app);
+
+            int buttonID = c.getIntent().getIntExtra("Button ID", 0);
+            intent.putExtra("Button ID", buttonID);
+
+            c.startActivity(intent);
         });
     }
 
