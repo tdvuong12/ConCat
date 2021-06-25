@@ -1,7 +1,9 @@
 package com.example.myapplication;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
@@ -55,14 +57,68 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
         holder.rowLayout.setOnClickListener(v -> {
             AppCompatActivity c = (AppCompatActivity) context;
             Intent intent = new Intent(c, MainActivity.class);
-            intent.putExtra("app", app);
 
             int buttonID = c.getIntent().getIntExtra("Button ID", 0);
-            intent.putExtra("Button ID", buttonID);
 
-            c.startActivity(intent);
+            String applabel = "";
+
+            try {
+                applabel = app.getLabel(context);
+            } catch (PackageManager.NameNotFoundException e) {
+                Log.d(TAG, e.toString());
+            }
+
+            //Setup the check function
+            AlertDialog.Builder alertdialog = new AlertDialog.Builder(context);
+            alertdialog.setTitle(applabel);
+            alertdialog.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    intent.putExtra("app", app);
+                    intent.putExtra("Button ID", buttonID);
+                    c.startActivity(intent);
+                }
+            });
+            alertdialog.setNegativeButton("No", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                }
+            });
+            alertdialog.show();
+
+
+
+
+
+
+
+
         });
     }
+
+    /*public void Check(String label, Context context, Boolean sure){
+        AlertDialog.Builder alertdialog = new AlertDialog.Builder(context);
+        alertdialog.setTitle(label);
+        alertdialog.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                sure = true;
+            }
+        });
+        alertdialog.setNegativeButton("No", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                sure = false;
+            }
+        });
+        alertdialog.show();
+    }
+
+     */
+
+
+
+
 
     @Override
     public int getItemCount() {
